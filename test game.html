@@ -37,10 +37,14 @@ var stars;
 var bombs;
 var platforms;
 var cursors;
+var touch;
 var score = 0;
 var gameOver = false;
 var scoreText;
-
+var platform;
+var movingleft;
+var movingright;
+var movingup;
 var game = new Phaser.Game(config);
 
 function preload ()
@@ -49,6 +53,9 @@ function preload ()
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
+    this.load.image('left button', 'assets/left button.png');
+    this.load.image('right button', 'assets/right button.png');
+    this.load.image('up button', 'assets/up button.png')
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
 
@@ -57,6 +64,8 @@ function create ()
     //  A simple background for our game
     this.add.image(400, 300, 'sky');
 
+   
+    
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = this.physics.add.staticGroup();
 
@@ -69,6 +78,18 @@ function create ()
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
 
+    //  Add button to our game
+    let leftButton = this.add.image(50, 550, 'left button').setScale(0.1).setInteractive();
+    leftButton.on("pointerdown", () => { movingleft = true; });
+    leftButton.on("pointerup", () => { movingleft = false; });
+
+    let rightButton = this.add.image(150, 550, 'right button').setScale(0.05).setInteractive();
+    rightButton.on("pointerdown", () => { movingright = true; });
+    rightButton.on("pointerup", () => { movingright = false; });
+
+    let upButton = this.add.image(600, 550, 'up button').setScale(0.1).setInteractive();
+    upButton.on("pointerdown", () => { movingup = true; });
+    upButton.on("pointerup", () => { movingup = false; });
     // The player and its settings
     player = this.physics.add.sprite(100, 450, 'dude');
 
@@ -137,13 +158,13 @@ function update ()
         return;
     }
 
-    if (cursors.left.isDown)
+    if (cursors.left.isDown || movingleft)
     {
         player.setVelocityX(-160);
 
         player.anims.play('left', true);
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown || movingright)
     {
         player.setVelocityX(160);
 
@@ -156,14 +177,12 @@ function update ()
         player.anims.play('turn');
     }
 
-    if (cursors.up.isDown && player.body.touching.down)
+    if ((cursors.up.isDown || movingup) && player.body.touching.down)
     {
         player.setVelocityY(-330);
     }
 
-    this.input.on('pointerdown', () =>{
-        player.setVelocityY(-330);
-    });
+  
 }
 
 function collectStar (player, star)
